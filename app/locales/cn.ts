@@ -863,6 +863,7 @@ const cn = {
       AutoRead: "自动朗读",
     },
     Status: {
+      Title: "状态",
       Loading: "加载中...",
       Playing: "朗读中",
       Paused: "已暂停",

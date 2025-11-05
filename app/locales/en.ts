@@ -873,6 +873,7 @@ const en: LocaleType = {
       AutoRead: "Auto Read",
     },
     Status: {
+      Title: "Status",
       Loading: "Loading...",
       Playing: "Playing",
       Paused: "Paused",

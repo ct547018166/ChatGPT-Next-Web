@@ -44,10 +44,18 @@ export function Reader() {
   const [isEpub, setIsEpub] = useState(false);
   const [textContent, setTextContent] = useState<string>("");
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState<number>(-1);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const ttsPlayerRef = useRef(createTTSPlayer());
+  const ttsPlayerRef = useRef<ReturnType<typeof createTTSPlayer> | null>(null);
   const renditionRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize TTS player lazily
+  useEffect(() => {
+    if (!ttsPlayerRef.current) {
+      ttsPlayerRef.current = createTTSPlayer();
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -57,6 +65,10 @@ export function Reader() {
       }
       if (ttsPlayerRef.current) {
         ttsPlayerRef.current.stop();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
     };
   }, [bookUrl]);
@@ -77,7 +89,7 @@ export function Reader() {
       setBookUrl(url);
 
       const fileName = file.name.toLowerCase();
-      
+
       if (fileName.endsWith(".epub")) {
         setIsEpub(true);
         setStatus(ReadingStatus.Idle);
@@ -96,9 +108,13 @@ export function Reader() {
       } else if (fileName.endsWith(".pdf")) {
         // For PDF, we'll show a message that it's not fully supported yet
         setIsEpub(false);
-        setTextContent("PDF support coming soon. Please use EPUB or TXT format for now.");
+        setTextContent(
+          "PDF support coming soon. Please use EPUB or TXT format for now.",
+        );
         setStatus(ReadingStatus.Idle);
-        showToast("PDF format is not fully supported yet. Please use EPUB or TXT.");
+        showToast(
+          "PDF format is not fully supported yet. Please use EPUB or TXT.",
+        );
       } else {
         setStatus(ReadingStatus.Error);
         showToast(Locale.Reader.LoadError);
@@ -162,38 +178,53 @@ export function Reader() {
       setStatus(ReadingStatus.Playing);
 
       try {
-        if (config.ttsConfig.engine !== DEFAULT_TTS_ENGINE) {
+        // Stop any existing audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+
+        if (config.ttsConfig.engine === "Edge-TTS") {
           // Use Microsoft Edge TTS
           const tts = new MsEdgeTTS();
           await tts.setMetadata(
             config.ttsConfig.voice,
             OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
           );
-          
+
           const result = await tts.toArrayBuffer(text);
           const audioBlob = new Blob([result], { type: "audio/mp3" });
           const audioUrl = URL.createObjectURL(audioBlob);
-          
+
           const audio = new Audio(audioUrl);
+          audioRef.current = audio;
           audio.playbackRate = config.ttsConfig.speed || 1.0;
-          
+
           audio.onended = () => {
             URL.revokeObjectURL(audioUrl);
             setStatus(ReadingStatus.Idle);
             setCurrentSentenceIndex(-1);
+            audioRef.current = null;
           };
-          
+
           audio.onerror = () => {
             URL.revokeObjectURL(audioUrl);
             setStatus(ReadingStatus.Error);
             showToast("Failed to play audio");
+            audioRef.current = null;
           };
-          
+
           await audio.play();
+        } else if (config.ttsConfig.engine === DEFAULT_TTS_ENGINE) {
+          // OpenAI TTS would require API integration
+          showToast(
+            "OpenAI TTS requires backend API integration. Please use Edge-TTS from settings.",
+          );
+          setStatus(ReadingStatus.Idle);
         } else {
-          // Use OpenAI TTS
-          // This would require an API call, simplified for now
-          showToast("OpenAI TTS requires API setup");
+          showToast(
+            "Unsupported TTS engine. Please configure TTS in settings.",
+          );
           setStatus(ReadingStatus.Idle);
         }
       } catch (error) {
@@ -207,7 +238,7 @@ export function Reader() {
 
   const handlePlay = useCallback(async () => {
     let text = "";
-    
+
     if (isEpub) {
       text = await extractTextFromEpub();
     } else {
@@ -219,14 +250,17 @@ export function Reader() {
       return;
     }
 
-    // Limit text to first 500 characters for demo
-    const limitedText = text.substring(0, 500);
-    await speakText(limitedText);
+    // Read the full text (removing demo limitation)
+    await speakText(text);
   }, [isEpub, textContent, extractTextFromEpub, speakText]);
 
   const handleStop = useCallback(() => {
     if (ttsPlayerRef.current) {
       ttsPlayerRef.current.stop();
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
     setStatus(ReadingStatus.Idle);
     setCurrentSentenceIndex(-1);
@@ -322,7 +356,7 @@ export function Reader() {
                 />
               </div>
             ) : (
-              <div 
+              <div
                 className={`${styles["text-content"]} ${
                   status === ReadingStatus.Playing ? styles.reading : ""
                 }`}
@@ -367,7 +401,7 @@ export function Reader() {
 
             <div className={styles["control-group"]}>
               <span className={styles["control-label"]}>
-                {Locale.Reader.Status.Loading}: {status}
+                {Locale.Reader.Status.Title}: {status}
               </span>
             </div>
           </div>
