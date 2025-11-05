@@ -836,6 +836,42 @@ const cn = {
       TileTexture: "贴图",
     },
   },
+  Reader: {
+    Title: "电子书阅读器",
+    SubTitle: "支持EPUB、PDF、TXT等格式，带AI朗读功能",
+    Upload: {
+      Title: "上传电子书",
+      SubTitle: "支持 EPUB、PDF、TXT、MOBI 格式",
+      Button: "选择文件",
+      Drag: "拖拽文件到此处",
+    },
+    Controls: {
+      Play: "播放",
+      Pause: "暂停",
+      Stop: "停止",
+      PrevChapter: "上一章",
+      NextChapter: "下一章",
+      Speed: "语速",
+      Voice: "语音",
+      Volume: "音量",
+    },
+    Settings: {
+      Title: "阅读设置",
+      FontSize: "字体大小",
+      LineHeight: "行高",
+      Theme: "主题",
+      AutoRead: "自动朗读",
+    },
+    Status: {
+      Loading: "加载中...",
+      Playing: "朗读中",
+      Paused: "已暂停",
+      Stopped: "已停止",
+      Error: "出错了",
+    },
+    NoBook: "请上传电子书开始阅读",
+    LoadError: "加载电子书失败",
+  },
   Sd: {
     SubTitle: (count: number) => `共 ${count} 条绘画`,
     Actions: {
