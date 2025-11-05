@@ -34,6 +34,22 @@ enum ReadingStatus {
   Error = "error",
 }
 
+function getStatusText(status: ReadingStatus, locale: any) {
+  switch (status) {
+    case ReadingStatus.Playing:
+      return locale.Reader.Status.Playing;
+    case ReadingStatus.Paused:
+      return locale.Reader.Status.Paused;
+    case ReadingStatus.Loading:
+      return locale.Reader.Status.Loading;
+    case ReadingStatus.Error:
+      return locale.Reader.Status.Error;
+    case ReadingStatus.Idle:
+    default:
+      return locale.Reader.Status.Stopped;
+  }
+}
+
 export function Reader() {
   const navigate = useNavigate();
   const config = useAppConfig();
@@ -401,7 +417,7 @@ export function Reader() {
 
             <div className={styles["control-group"]}>
               <span className={styles["control-label"]}>
-                {Locale.Reader.Status.Title}: {status}
+                {Locale.Reader.Status.Title}: {getStatusText(status, Locale)}
               </span>
             </div>
           </div>
