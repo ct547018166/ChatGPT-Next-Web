@@ -846,6 +846,43 @@ const en: LocaleType = {
       TileTexture: "tile-texture",
     },
   },
+  Reader: {
+    Title: "E-Book Reader",
+    SubTitle: "Support EPUB, PDF, TXT formats with AI read-aloud",
+    Upload: {
+      Title: "Upload E-Book",
+      SubTitle: "Support EPUB, PDF, TXT, MOBI formats",
+      Button: "Choose File",
+      Drag: "Drag file here",
+    },
+    Controls: {
+      Play: "Play",
+      Pause: "Pause",
+      Stop: "Stop",
+      PrevChapter: "Previous Chapter",
+      NextChapter: "Next Chapter",
+      Speed: "Speed",
+      Voice: "Voice",
+      Volume: "Volume",
+    },
+    Settings: {
+      Title: "Reading Settings",
+      FontSize: "Font Size",
+      LineHeight: "Line Height",
+      Theme: "Theme",
+      AutoRead: "Auto Read",
+    },
+    Status: {
+      Title: "Status",
+      Loading: "Loading...",
+      Playing: "Playing",
+      Paused: "Paused",
+      Stopped: "Stopped",
+      Error: "Error",
+    },
+    NoBook: "Please upload an e-book to start reading",
+    LoadError: "Failed to load e-book",
+  },
   Sd: {
     SubTitle: (count: number) => `${count} images`,
     Actions: {
